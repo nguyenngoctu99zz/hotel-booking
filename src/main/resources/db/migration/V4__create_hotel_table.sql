@@ -32,7 +32,7 @@ CREATE TABLE rooms (
                        room_type_id BIGINT NOT NULL,
                        room_number VARCHAR(20) NOT NULL,
                        floor_no INT,
-                       room_status VARCHAR(30) NOT NULL DEFAULT 'AVAILABLE',
+                       room_status INT NOT NULL DEFAULT 1,
                        CONSTRAINT fk_room_hotel
                            FOREIGN KEY (hotel_id) REFERENCES hotel_profiles(hotel_id)
                                ON DELETE CASCADE,
@@ -44,7 +44,7 @@ CREATE TABLE room_availability (
                                    room_available_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                    room_id BIGINT NOT NULL,
                                    available_date DATE NOT NULL,
-                                   availability_status VARCHAR(30) NOT NULL,
+                                   availability_status INT NOT NULL DEFAULT 1,
                                    price DECIMAL(15,2) NOT NULL,
                                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                    modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+
 @Slf4j(topic = "REDIS-CONFIG")
 @Configuration
 @EnableRedisRepositories(
@@ -37,7 +38,7 @@ public class RedisConfig {
         return new JedisConnectionFactory(config);
     }
 
-
+    // AUTH TEMPLATE
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -45,6 +46,22 @@ public class RedisConfig {
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
+
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    // HOTEL HASH TEMPLATE
+    @Bean(name = "hotelRedisTemplate")
+    public RedisTemplate<String, Object> hotelRedisTemplate() {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(jedisConnectionFactory());
+
+        template.setKeySerializer(new StringRedisSerializer());
+
+        // chỉ tối ưu cho HASH
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(new StringRedisSerializer());
 
