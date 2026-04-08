@@ -15,6 +15,7 @@ import com.nnt.hotelbooking.common.exception.AppException;
 import com.nnt.hotelbooking.common.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j(topic = "AUTH-SERVICE")
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -36,6 +38,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
+        log.info("[LOGIN] Request | username={}",
+                request.getUsername());
+
         Auth auth = authRepository.findActiveByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 

@@ -9,9 +9,11 @@ import com.nnt.hotelbooking.auth.utils.JwtUtil;
 import com.nnt.hotelbooking.common.exception.AppException;
 import com.nnt.hotelbooking.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j(topic = "PASSWORD-SERVICE")
 @Service
 @RequiredArgsConstructor
 public class ChangePasswordServiceImpl implements ChangePasswordService {
@@ -24,6 +26,9 @@ public class ChangePasswordServiceImpl implements ChangePasswordService {
 
     @Override
     public void changePassword(String accessToken, ChangePasswordRequest request) {
+
+        log.info("[PASSWORD] Request | change password");
+
         Long userId = jwtUtil.extractUserId(accessToken);
         String jti = jwtUtil.extractJti(accessToken);
         long ttl = jwtUtil.getRemainingMillis(accessToken);
