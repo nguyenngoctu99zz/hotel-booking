@@ -1,6 +1,7 @@
 package com.nnt.hotelbooking.auth.utils;
 
 import com.nnt.hotelbooking.auth.service.RedisSessionService;
+import com.nnt.hotelbooking.common.currentUser.CustomUserPrincipal;
 import com.nnt.hotelbooking.common.exception.AppException;
 import com.nnt.hotelbooking.common.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
@@ -78,13 +79,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+            CustomUserPrincipal principal = new CustomUserPrincipal(
+                    userId,
+                    username,
+                    Collections.emptyList()
+            );
+
             // 5) set authenticated user
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
-                            username,
+                            principal,
                             null,
-                            Collections.emptyList()
+                            principal.getAuthorities()
                     );
+
+//            UsernamePasswordAuthenticationToken authentication =
+//                    new UsernamePasswordAuthenticationToken(
+//                            username,
+//                            null,
+//                            Collections.emptyList()
+//                    );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
