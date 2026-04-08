@@ -10,10 +10,13 @@ import com.nnt.hotelbooking.common.exception.AppException;
 import com.nnt.hotelbooking.common.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
+@Slf4j(topic = "REGISTER-SERVICE")
 @Service
 @RequiredArgsConstructor
 public class RegisterServiceImpl implements RegisterService {
@@ -25,6 +28,8 @@ public class RegisterServiceImpl implements RegisterService {
     @Transactional
     @Override
     public RegisterResponse register(RegisterRequest request) {
+        log.info("[REGISTER] Request | username={}",
+                request.getUsername());
 
         if (authRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USERNAME_EXISTS);
@@ -61,31 +66,5 @@ public class RegisterServiceImpl implements RegisterService {
                 .build();
     }
 
-//    @Override
-//    public RegisterResponse register(RegisterRequest request) {
-//
-//        if (authRepository.existsByUsername(request.getUsername())) {
-//            throw new AppException(ErrorCode.USERNAME_EXISTS);
-//        }
-//
-//        if (authRepository.existsByEmail(request.getEmail())) {
-//            throw new AppException(ErrorCode.EMAIL_EXISTS);
-//        }
-//
-//        Auth auth = Auth.builder()
-//                .username(request.getUsername())
-//                .email(request.getEmail())
-//                .password(passwordEncoder.encode(request.getPassword()))
-//                .accountStatus("ACTIVE")
-//                .build();
-//
-//        Auth saved = authRepository.save(auth);
-//
-//        return RegisterResponse.builder()
-//                .userId(saved.getId())
-//                .username(saved.getUsername())
-//                .email(saved.getEmail())
-//                .build();
-//    }
 
 }

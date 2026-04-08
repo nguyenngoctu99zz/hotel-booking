@@ -12,7 +12,7 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse <T>{
 
-    private String code;
+    private Integer code;
 
     private String message;
 

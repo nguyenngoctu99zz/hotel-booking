@@ -33,7 +33,7 @@ public class AuthController {
                 request.getUsername());
 
         return ApiResponse.<LoginResponse>builder()
-                .code("200")
+                .code(200)
                 .message("Login success")
                 .result(authService.login(request))
                 .build();
@@ -47,7 +47,7 @@ public class AuthController {
         authService.logout(token);
 
         return ApiResponse.<Void>builder()
-                .code("200")
+                .code(200)
                 .message("Logout success")
                 .build();
     }
@@ -61,7 +61,7 @@ public class AuthController {
                 request.getUsername());
 
         return ApiResponse.<RegisterResponse>builder()
-                .code("200")
+                .code(200)
                 .message("Register success")
                 .result(registerService.register(request))
                 .build();
@@ -74,7 +74,7 @@ public class AuthController {
         log.info("[REFRESH-TOKEN][API][REQUEST]");
 
         return ApiResponse.<RefreshTokenResponse>builder()
-                .code("200")
+                .code(200)
                 .message("Refresh success")
                 .result(authService.refreshToken(request))
                 .build();
@@ -93,7 +93,7 @@ public class AuthController {
         changePasswordService.changePassword(token, body);
 
         return ApiResponse.<Void>builder()
-                .code("200")
+                .code(200)
                 .message("Password changed successfully")
                 .build();
     }
@@ -103,7 +103,7 @@ public class AuthController {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
 
         return ApiResponse.<String>builder()
-                .code("200")
+                .code(200)
                 .message("Token checked")
                 .result(authService.checkToken(token))
                 .build();
