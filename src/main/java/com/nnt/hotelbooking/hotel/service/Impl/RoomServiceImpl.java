@@ -1,5 +1,7 @@
 package com.nnt.hotelbooking.hotel.service.Impl;
 
+import com.nnt.hotelbooking.common.exception.AppException;
+import com.nnt.hotelbooking.common.exception.ErrorCode;
 import com.nnt.hotelbooking.hotel.dto.RoomDetailProjection;
 import com.nnt.hotelbooking.hotel.dto.response.RoomDetailResponse;
 import com.nnt.hotelbooking.hotel.repository.RoomRepository;
@@ -28,6 +30,7 @@ public class RoomServiceImpl implements RoomService {
     @Qualifier("hotelRedisTemplate")
     private final RedisTemplate<String, Object> hotelRedisTemplate;
 
+    /// Caching Strategy: Cache-Aside
     @Override
     public RoomDetailResponse getRoomDetail(Long roomId) {
         String cacheKey = ROOM_DETAIL_KEY + roomId;
@@ -36,7 +39,7 @@ public class RoomServiceImpl implements RoomService {
         Map<Object, Object> cached = hotelRedisTemplate.opsForHash().entries(cacheKey);
 
         if (!cached.isEmpty()) {
-            log.info("ROOM HASH CACHE HIT: {}", cacheKey);
+            log.info("[ROOM-INFO] HASH CACHE | HIT: {}", cacheKey);
 
             return RoomDetailResponse.builder()
                     .roomId(Long.parseLong(cached.get("roomId").toString()))
@@ -55,10 +58,10 @@ public class RoomServiceImpl implements RoomService {
         }
 
         // CACHE MISS -> DB
-        log.info("ROOM HASH CACHE MISS: {}", cacheKey);
+        log.info("[ROOM-INFO] CACHE | MISS: {}", cacheKey);
 
         RoomDetailProjection room = roomRepository.findRoomDetailById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
 
         RoomDetailResponse response = RoomDetailResponse.builder()
                 .roomId(room.getRoomId())
@@ -93,7 +96,7 @@ public class RoomServiceImpl implements RoomService {
         hotelRedisTemplate.opsForHash().putAll(cacheKey, roomHash);
         hotelRedisTemplate.expire(cacheKey, TTL_MINUTES, TimeUnit.MINUTES);
 
-        log.info("ROOM HASH CACHE SAVED: {}", cacheKey);
+        log.info("[ROOM-INFO] CACHE | SAVED REDIS: {}", cacheKey);
 
         return response;
     }
