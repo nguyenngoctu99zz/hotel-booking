@@ -6,8 +6,9 @@ import lombok.Getter;
 @Getter
 public enum AvailabilityStatus {
     AVAILABLE(1),
-    BOOKED(2),
-    MAINTENANCE(3);
+    BOOKING_IN_PROGRESS(2),
+    BOOKED(3),
+    MAINTENANCE(4);
 
     private final int code;
 

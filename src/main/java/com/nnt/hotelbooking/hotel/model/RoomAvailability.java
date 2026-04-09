@@ -1,6 +1,7 @@
 package com.nnt.hotelbooking.hotel.model;
 
 import com.nnt.hotelbooking.hotel.constants.AvailabilityStatus;
+import com.nnt.hotelbooking.hotel.converter.AvailabilityStatusConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,7 @@ public class RoomAvailability {
     @Column(name = "available_date", nullable = false)
     private LocalDate availableDate;
 
+    @Convert(converter = AvailabilityStatusConverter.class)
     @Column(name = "availability_status", nullable = false)
     private AvailabilityStatus availabilityStatus;
 

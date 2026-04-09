@@ -10,7 +10,7 @@ CREATE TABLE bookings (
                           checkout_date DATE NOT NULL,
                           total_nights INT NOT NULL,
                           total_amount DECIMAL(15,2) NOT NULL,
-                          booking_status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+                          booking_status INT NOT NULL DEFAULT 1,
                           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                           modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
@@ -19,8 +19,8 @@ CREATE TABLE bookings (
 CREATE TABLE booking_histories (
                                    booking_history_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                    booking_id BIGINT NOT NULL,
-                                   from_status VARCHAR(30),
-                                   to_status VARCHAR(30) NOT NULL,
+                                   from_status INT,
+                                   to_status INT NOT NULL,
                                    changed_by VARCHAR(30) NOT NULL,
                                    note TEXT,
                                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
