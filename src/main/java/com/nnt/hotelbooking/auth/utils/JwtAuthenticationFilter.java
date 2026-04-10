@@ -38,7 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        // Không có token -> cho đi tiếp
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -47,35 +46,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = header.substring(7);
 
-            // 1) verify JWT + expiration
             Claims claims = jwtUtil.extractClaims(token);
 
             String username = claims.getSubject();
             String jti = claims.getId();
+            String deviceId = claims.get("deviceId", String.class);
             Long userId = claims.get("userId", Long.class);
             Integer tokenVersion = claims.get("version", Integer.class);
 
-            //2) blacklist check
             if (redisSessionService.isBlacklisted(jti)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token blacklisted");
+                unauthorized(response, "Token blacklisted");
                 return;
             }
 
-            // 3) active session check
             if (!redisSessionService.isActive(jti)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token not active");
+                unauthorized(response, "Token not active");
                 return;
             }
 
-            // 4) token version check
+            String currentJti =
+                    redisSessionService.getCurrentJti(userId, deviceId);
+
+            if (currentJti == null || !currentJti.equals(jti)) {
+                unauthorized(response, "Token replaced by newer session");
+                return;
+            }
+
             Auth auth = authRepository.findById(userId)
-                    .orElseThrow(() -> new AppException(ErrorCode.TOKEN_VERSION_INVALID));
+                    .orElseThrow(() ->
+                            new AppException(ErrorCode.TOKEN_VERSION_INVALID));
 
             if (!tokenVersion.equals(auth.getAccessTokenVersion())) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token version invalid");
+                unauthorized(response, "Token version invalid");
                 return;
             }
 
@@ -85,7 +87,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Collections.emptyList()
             );
 
-            // 5) set authenticated user
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             principal,
@@ -96,11 +97,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (JwtException | IllegalArgumentException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid token");
+            unauthorized(response, "Invalid token");
             return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void unauthorized(HttpServletResponse response, String message)
+            throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write(message);
     }
 }
