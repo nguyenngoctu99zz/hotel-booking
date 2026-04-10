@@ -1,5 +1,6 @@
 package com.nnt.hotelbooking.auth.service.Impl;
 
+import com.nnt.hotelbooking.auth.constants.AccountStatus;
 import com.nnt.hotelbooking.auth.dto.request.RefreshTokenRequest;
 import com.nnt.hotelbooking.auth.dto.response.RefreshTokenResponse;
 import com.nnt.hotelbooking.auth.model.RefreshToken;
@@ -41,8 +42,10 @@ public class AuthServiceImpl implements AuthService {
         log.info("[LOGIN] Request | username={}",
                 request.getUsername());
 
-        Auth auth = authRepository.findActiveByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        Auth auth = authRepository.findByUsernameAndStatus(
+                request.getUsername(),
+                AccountStatus.ACTIVE
+        ).orElseThrow(() -> new RuntimeException("Account not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), auth.getPassword())) {
             throw new AppException(ErrorCode.INVALID_USERNAME_PASSWORD);
@@ -96,19 +99,27 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
-        String oldRefreshToken = request.getRefreshToken();
+        String refreshToken = request.getRefreshToken();
 
-        Claims claims = jwtUtil.extractClaims(oldRefreshToken);
+        log.info("[REFRESH] Request");
+
+        Claims claims = jwtUtil.extractClaims(refreshToken);
 
         RefreshToken savedToken = refreshTokenRepository
-                .findByTokenValue(oldRefreshToken)
+                .findByTokenValue(refreshToken)
                 .orElseThrow(() -> new AppException(ErrorCode.REFRESH_TOKEN_INVALID));
+
+        // Check token hết hạn trong DB
+        if (savedToken.getExpiredAt().isBefore(LocalDateTime.now())) {
+            log.warn("[REFRESH] Token expired in DB | authId={}", savedToken.getAuthId());
+            refreshTokenRepository.delete(savedToken);
+            throw new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
 
         Long userId = claims.get("userId", Long.class);
         String username = claims.getSubject();
         String deviceId = claims.get("deviceId", String.class);
 
-        // Lấy version mới nhất từ DB
         Auth auth = authRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -119,32 +130,17 @@ public class AuthServiceImpl implements AuthService {
                 auth.getAccessTokenVersion()
         );
 
-        String newRefreshToken = jwtUtil.generateRefreshToken(
-                userId,
-                username,
-                deviceId
-        );
-
-        refreshTokenRepository.delete(savedToken);
-
-        refreshTokenRepository.save(
-                RefreshToken.builder()
-                        .tokenValue(newRefreshToken)
-                        .authId(userId)
-                        .expiredAt(LocalDateTime.now().plusDays(7))
-                        .build()
-        );
-
-        enforceMaxRefreshTokens(userId);
-
         String jti = jwtUtil.extractJti(newAccessToken);
         long ttl = jwtUtil.getRemainingMillis(newAccessToken);
 
         redisSessionService.saveSession(userId, jti, newAccessToken, ttl);
 
+        log.info("[REFRESH] New access token generated | authId={} | deviceId={}",
+                userId, deviceId);
+
         return RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 

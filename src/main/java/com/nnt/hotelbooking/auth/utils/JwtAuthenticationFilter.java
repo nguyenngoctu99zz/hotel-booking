@@ -93,13 +93,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             principal.getAuthorities()
                     );
 
-//            UsernamePasswordAuthenticationToken authentication =
-//                    new UsernamePasswordAuthenticationToken(
-//                            username,
-//                            null,
-//                            Collections.emptyList()
-//                    );
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (JwtException | IllegalArgumentException e) {

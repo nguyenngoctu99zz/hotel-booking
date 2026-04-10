@@ -1,6 +1,8 @@
 package com.nnt.hotelbooking.auth.model;
 
 
+import com.nnt.hotelbooking.auth.constants.AccountStatus;
+import com.nnt.hotelbooking.auth.converter.AccountStatusConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,8 +38,10 @@ public class Auth {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "account_status", nullable = false, length = 30)
-    private String accountStatus;
+    @Builder.Default
+    @Convert(converter = AccountStatusConverter.class)
+    @Column(name = "account_status", nullable = false)
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
     @Builder.Default
     @Column(name = "access_token_version", nullable = false)
@@ -50,7 +54,7 @@ public class Auth {
         this.updatedAt = now;
 
         if (this.accountStatus == null) {
-            this.accountStatus = "ACTIVE";
+            this.accountStatus = AccountStatus.ACTIVE;
         }
     }
 

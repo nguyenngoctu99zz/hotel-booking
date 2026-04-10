@@ -33,12 +33,12 @@ public enum ErrorCode {
     // PASSWORD 3000
     OLD_PASSWORD_INCORRECT(3001, "Old password incorrect", HttpStatus.BAD_REQUEST),
 
-    // BOOKING 4000
+    // ROOM - BOOKING 4000
     ROOM_NOT_AVAILABLE(4001, "Room is not available", HttpStatus.CONFLICT),
     ROOM_AVAILABILITY_NOT_FOUND(4002, "Room availability not found", HttpStatus.NOT_FOUND),
     INVALID_BOOKING_DATE(4003, "Invalid booking date", HttpStatus.BAD_REQUEST),
     BOOKING_NOT_FOUND(4004, "Booking not found", HttpStatus.NOT_FOUND),
-    ROOM_NOT_FOUND(4001, "Room not found", HttpStatus.NOT_FOUND);
+    ROOM_NOT_FOUND(4005, "Room not found", HttpStatus.NOT_FOUND);
 
 
 
