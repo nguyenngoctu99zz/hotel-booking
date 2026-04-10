@@ -9,7 +9,7 @@ CREATE TABLE auth (
                       access_token_version  INT,
                       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                      account_status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE'
+                      account_status TINYINT NOT NULL DEFAULT 0 CHECK (account_status IN (0,1))
 );
 
 CREATE TABLE refresh_tokens (

@@ -1,5 +1,6 @@
 package com.nnt.hotelbooking.auth.service.Impl;
 
+import com.nnt.hotelbooking.auth.constants.AccountStatus;
 import com.nnt.hotelbooking.auth.dto.request.RegisterRequest;
 import com.nnt.hotelbooking.auth.dto.response.RegisterResponse;
 import com.nnt.hotelbooking.auth.event.UserRegisteredEvent;
@@ -43,7 +44,7 @@ public class RegisterServiceImpl implements RegisterService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .accountStatus("ACTIVE")
+                .accountStatus(AccountStatus.ACTIVE)
                 .build();
 
         Auth saved = authRepository.save(auth);
