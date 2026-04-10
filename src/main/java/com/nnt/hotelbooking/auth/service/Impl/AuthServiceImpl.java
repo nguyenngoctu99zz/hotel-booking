@@ -39,8 +39,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        log.info("[LOGIN] Request | username={}",
-                request.getUsername());
+        log.info("[LOGIN] Request | username={}", request.getUsername());
 
         Auth auth = authRepository.findByUsernameAndStatus(
                 request.getUsername(),
@@ -78,7 +77,14 @@ public class AuthServiceImpl implements AuthService {
 
         String jti = jwtUtil.extractJti(accessToken);
         long ttl = jwtUtil.getRemainingMillis(accessToken);
-        redisSessionService.saveSession(auth.getId(), jti, accessToken, ttl);
+
+        redisSessionService.saveSession(
+                auth.getId(),
+                jti,
+                accessToken,
+                ttl,
+                deviceId
+        );
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
@@ -89,12 +95,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(String accessToken) {
-        Long userId = jwtUtil.extractUserId(accessToken);
-        String jti = jwtUtil.extractJti(accessToken);
+        Claims claims = jwtUtil.extractClaims(accessToken);
+
+        Long userId = claims.get("userId", Long.class);
+        String jti = claims.getId();
+        String deviceId = claims.get("deviceId", String.class);
         long ttl = jwtUtil.getRemainingMillis(accessToken);
 
         redisSessionService.blacklistToken(jti, ttl);
-        redisSessionService.removeActiveSession(userId, jti);
+        redisSessionService.removeActiveSession(userId, jti, deviceId);
+
+        log.info("[LOGOUT] Success | userId={} | deviceId={}",
+                userId, deviceId);
     }
 
     @Override
@@ -109,9 +121,7 @@ public class AuthServiceImpl implements AuthService {
                 .findByTokenValue(refreshToken)
                 .orElseThrow(() -> new AppException(ErrorCode.REFRESH_TOKEN_INVALID));
 
-        // Check token hết hạn trong DB
         if (savedToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            log.warn("[REFRESH] Token expired in DB | authId={}", savedToken.getAuthId());
             refreshTokenRepository.delete(savedToken);
             throw new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
         }
@@ -133,10 +143,13 @@ public class AuthServiceImpl implements AuthService {
         String jti = jwtUtil.extractJti(newAccessToken);
         long ttl = jwtUtil.getRemainingMillis(newAccessToken);
 
-        redisSessionService.saveSession(userId, jti, newAccessToken, ttl);
-
-        log.info("[REFRESH] New access token generated | authId={} | deviceId={}",
-                userId, deviceId);
+        redisSessionService.saveSession(
+                userId,
+                jti,
+                newAccessToken,
+                ttl,
+                deviceId
+        );
 
         return RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
