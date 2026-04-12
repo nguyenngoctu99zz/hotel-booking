@@ -11,12 +11,14 @@ import com.nnt.hotelbooking.auth.service.AuthService;
 import com.nnt.hotelbooking.auth.service.ChangePasswordService;
 import com.nnt.hotelbooking.auth.service.RegisterService;
 import com.nnt.hotelbooking.common.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-
+@Tag(name = "Authentication", description = "Authentication APIs")
 @Slf4j(topic = "AUTH-CONTROLLER")
 @RestController
 @RequestMapping("/auth")
@@ -27,6 +29,10 @@ public class AuthController {
     private final ChangePasswordService changePasswordService;
     private final RegisterService registerService;
 
+    @Operation(
+            summary = "User login",
+            description = "Authenticate user and return access token"
+    )
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request) {
         log.info("[LOGIN][API][REQUEST] username={}",
@@ -39,6 +45,10 @@ public class AuthController {
                 .build();
     }
 
+    @Operation(
+            summary = "User logout",
+            description = "Logout current user and invalidate token in Redis"
+    )
     @PostMapping("/logout")
     public ApiResponse<Void> logout(HttpServletRequest request) {
         log.info("[LOGOUT][API][REQUEST] Request to log out");
@@ -52,6 +62,10 @@ public class AuthController {
                 .build();
     }
 
+    @Operation(
+            summary = "Register account",
+            description = "Create new user account"
+    )
     @PostMapping("/register")
     public ApiResponse<RegisterResponse> register(
             @RequestBody RegisterRequest request
@@ -67,6 +81,10 @@ public class AuthController {
                 .build();
     }
 
+    @Operation(
+            summary = "Register account",
+            description = "Create new user account"
+    )
     @PostMapping("/refresh")
     public ApiResponse<RefreshTokenResponse> refresh(
             @RequestBody RefreshTokenRequest request
@@ -80,6 +98,10 @@ public class AuthController {
                 .build();
     }
 
+    @Operation(
+            summary = "Change password",
+            description = "Change password and revoke all existing devices/tokens"
+    )
     @PostMapping("/change-password")
     public ApiResponse<Void> changePassword(
             HttpServletRequest request,

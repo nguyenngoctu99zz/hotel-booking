@@ -52,3 +52,12 @@ app:
 logging:
   level:
     org.apache.poi.xssf.usermodel.XSSFWorkbook: ERROR
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+    operationsSorter: method
+    tagsSorter: alpha
+    display-request-duration: true

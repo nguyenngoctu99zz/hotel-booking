@@ -4,10 +4,13 @@ import com.nnt.hotelbooking.booking.dto.request.CreateBookingRequest;
 import com.nnt.hotelbooking.booking.dto.response.BookingResponse;
 import com.nnt.hotelbooking.booking.service.BookingService;
 import com.nnt.hotelbooking.common.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Booking", description = "Booking management APIs")
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
@@ -15,6 +18,10 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    @Operation(
+            summary = "Create booking",
+            description = "Create a room booking for selected dates"
+    )
     @PostMapping
     public ApiResponse<BookingResponse> createBooking(
             @Valid @RequestBody CreateBookingRequest request

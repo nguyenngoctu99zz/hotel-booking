@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Slf4j(topic = "USER-PROFILE-LISTENER")
 public class UserProfileCreatedListener {
 
     private final UserService userService;
@@ -19,7 +19,7 @@ public class UserProfileCreatedListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(UserRegisteredEvent event) {
 
-        log.info("Listener received UserRegisteredEvent authId={}", event.getAuthId());
+        log.info("[USER-PROFILE] Listener | UserRegisteredEvent authId={}", event.getAuthId());
 
         userService.createProfileFromRegisterEvent(event);
     }
