@@ -1,0 +1,14 @@
+package com.nnt.hotelbooking.auth.repository;
+
+import com.nnt.hotelbooking.auth.model.RefreshToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+
+    Optional<RefreshToken> findByTokenValue(String tokenValue);
+
+    List<RefreshToken> findByAuthIdOrderByCreatedAtAsc(Long authId);
+}
